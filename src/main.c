@@ -30,13 +30,17 @@ void handle_client_response(int sockfd){
 
 	char *ContentLength = "Content-Length: ";
 	char *end = "\n\n";
-	
+
+	// Writes the first two headers	
 	write(sockfd,headers,strlen(headers));
+	// Writes 'Content Length: '
 	write(sockfd,ContentLength,strlen(ContentLength));
+	// Writes the 'value' of Content Length 
 	write(sockfd,length,strlen(length));
+	// Two endline (aka CRLF, newline) chars to seperate the HEADERS from the BODY of the response.
 	write(sockfd,end,strlen(end));	
+	// The actual content. (html file)
 	write(sockfd,f->data,f->size);
-	write(sockfd,end,strlen(end));
 
 }
 
