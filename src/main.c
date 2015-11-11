@@ -6,13 +6,17 @@
 #include "socklib.h"
 #include "file.h"
 
+void err(char *msg){
+	printf("[*] error '%s'.\n",msg);
+}
+
 void handle_client_response(int sockfd){	
 	char *headers = "HTTP/1.1 200 OK\nContent-Type: text/html\n";
 
 	struct FileBuffer *f = file_read("index.html");
 	
 	if( f->data == NULL){
-		printf("Could not open file");
+		err("(handle_client_response) reading file");
 	}
 
 	char *length = malloc(32);
@@ -44,29 +48,57 @@ void handle_client(int sockfd){
 	handle_client_response(sockfd);
 }
 
-void run_server(){	
+void run_server(int port){
+	// Socket Identifier	
 	int server_sock, client_sock;
+	// Socket Address
 	struct sockaddr *server_addr, *client_addr;
-	
-	server_sock = sl_tcp_server(sl_sockaddr_server(1025));	
+	// * Avoid Undefined Behavior
+	server_addr = NULL;
+	client_addr = NULL;
+	// Attempt To Bind Server
+	server_sock = sl_tcp_server(sl_sockaddr_server(port));	
+	// Allocate a sockaddr for the client
 	client_addr = sl_sockaddr();
-	
+
 	signed char running = 1;
 	
-	while(running){
-		client_sock = sl_accept(server_sock,client_addr);
-		running = check_errors(server_sock,client_sock);
-		handle_client(client_sock);
-		close(client_sock);	
+	if(server_sock < 0){
+		err("(sl_tcp_server) binding socket");
+		running = 0;
 	}
 
-	free(server_addr);
-	free(client_addr);
+	while(running){
+		client_sock = sl_accept(server_sock,client_addr);
+		
+		if(client_sock < 0){
+			err("(sl_accept) accepting connection.");
+			running = 0;
+		}else{
+			printf("%s", "[*] Accepted Connection.\n");
+		}
+		
+		handle_client(client_sock);
+		close(client_sock);	
+		printf("%s", "[*] Closed Connection.\n");
+	}
+	
+	// We check != NULL here incase our addr's failed to be allocated -
+	// which happens for server_addr if sl_tcp_server fails to bind.
+	if(server_addr!=NULL) free(server_addr);
+	if(client_addr!=NULL) free(client_addr);
 }
 
 int main(char argc, char **argv){
+	int port = 1024;
+
+	char *port_string = malloc(32);
+	bzero(port_string,32);
+	snprintf(port_string,32,"%d",port);
+
+	printf("[*] Running server on *%s.\n", port_string);
 	
-	run_server();
+	run_server(port);
 
 	return 0;
 };
