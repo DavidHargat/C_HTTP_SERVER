@@ -31,6 +31,8 @@ struct FileBuffer *file_read(char *filename){
 	for(i=0; i<length; i++){
 		fd->data[i] = fgetc(f);
 	}
+	
+	fclose(f);
 
 	return fd;
 }

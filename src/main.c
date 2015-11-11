@@ -6,23 +6,14 @@
 #include "socklib.h"
 #include "file.h"
 
-int check_errors(int s, int c)
-{
-	if(s<=0){
-		printf("%s","Server Bind Error\n");
-		return 0;
-	}
-	if(c<=0){
-		printf("%s","Client Bind Error\n");
-		return 0;
-	}
-	return 1;
-}
-
 void handle_client_response(int sockfd){	
 	char *headers = "HTTP/1.1 200 OK\nContent-Type: text/html\n";
 
 	struct FileBuffer *f = file_read("index.html");
+	
+	if( f->data == NULL){
+		printf("Could not open file");
+	}
 
 	char *length = malloc(32);
 	bzero(length,32);
@@ -37,7 +28,7 @@ void handle_client_response(int sockfd){
 	write(sockfd,ContentLength,strlen(ContentLength));
 	// Writes the 'value' of Content Length 
 	write(sockfd,length,strlen(length));
-	// Two endline (aka CRLF, newline) chars to seperate the HEADERS from the BODY of the response.
+	// Two endline (aka CRLF, newline, EOL) chars to seperate the HEADERS from the BODY of the response.
 	write(sockfd,end,strlen(end));	
 	// The actual content. (html file)
 	write(sockfd,f->data,f->size);
