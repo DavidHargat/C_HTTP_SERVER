@@ -5,9 +5,17 @@
 
 #include "socklib.h"
 #include "file.h"
+#include "args.h"
 
 void err(char *msg){
 	printf("[*] error '%s'.\n",msg);
+}
+
+void print_startup(int port){
+	char *port_string = malloc(32);
+	bzero(port_string,32);
+	snprintf(port_string,32,"%d",port);
+	printf("[*] Running server on *%s.\n", port_string);	
 }
 
 void handle_client_response(int sockfd){	
@@ -68,6 +76,8 @@ void run_server(int port){
 		running = 0;
 	}
 
+	print_startup(port);
+	
 	while(running){
 		client_sock = sl_accept(server_sock,client_addr);
 		
@@ -88,17 +98,15 @@ void run_server(int port){
 	if(server_addr!=NULL) free(server_addr);
 	if(client_addr!=NULL) free(client_addr);
 }
-
-int main(char argc, char **argv){
+int main(char argc, char *argv[]){
 	int port = 1024;
-
-	char *port_string = malloc(32);
-	bzero(port_string,32);
-	snprintf(port_string,32,"%d",port);
-
-	printf("[*] Running server on *%s.\n", port_string);
 	
-	run_server(port);
+	struct ArgBuffer *args = args_parse(argc, argv);
+	
+	printf("[*] option port '%d'\n", args->port);	
+	printf("[*] option verbose '%d'\n", args->verbose);
+	
+	//run_server(port);
 
 	return 0;
 };

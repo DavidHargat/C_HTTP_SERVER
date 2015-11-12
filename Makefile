@@ -1,10 +1,12 @@
 
 # List of all object files
 OBJECTS = build/main.o\
-	  build/file.o
+	  build/file.o\
+	  build/args.o
 
 HEADERS = src/socklib.h\
-	  src/file.h
+	  src/file.h\
+	  src/args.h
 
 
 .PHONY: all
