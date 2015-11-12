@@ -17,11 +17,11 @@ should output: `build/app`
 
 ## options
 
-** required **
+**required**
 
 `-p <number>` - port number 
 
-** optional **
+**optional**
 
 `-v` - verbose mode
 
