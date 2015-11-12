@@ -7,6 +7,6 @@ struct ArgBuffer{
 	int verbose;
 };
 
-struct ArgBuffer *args_parse(char argc, char *argv[]);
+int args_handle(char argc, char *argv[]);
 
 #endif

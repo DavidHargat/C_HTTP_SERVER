@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "args.h"
+#include "options.h"
 
 #define ARGS_LIST "pv"
 #define ARGS_LIST_PARAMETER "p"
@@ -57,6 +58,19 @@ char args_parse_option(char *option){
 	return 0;
 }
 
+int args_export( struct ArgBuffer *args ){
+	if(args->port > 0){
+		OPTION_PORT = args->port;
+	}else{
+		util_err("port not set");
+		util_usage();	
+		return -1;
+	}
+
+	OPTION_VERBOSE = args->verbose;
+	return 1;
+}
+
 struct ArgBuffer *args_parse(char argc, char *argv[]){
 	struct ArgBuffer *args; 
 	args = malloc(sizeof(*args));
@@ -90,7 +104,6 @@ struct ArgBuffer *args_parse(char argc, char *argv[]){
 	return args;
 }
 
-
-
-
-
+int args_handle(char argc, char *argv[]){
+	return args_export(args_parse(argc,argv));
+}

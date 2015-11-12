@@ -10,9 +10,8 @@
 
 #include "options.h"
 
-int OPTION_PORT = -1;
 int OPTION_VERBOSE = -1;
-	
+int OPTION_PORT = -1;
 
 void handle_client_response(int sockfd){	
 	char *headers = "HTTP/1.1 200 OK\nContent-Type: text/html\n";
@@ -96,26 +95,11 @@ void run_server(int port){
 	if(client_addr!=NULL) free(client_addr);
 }
 
-int export_args( struct ArgBuffer *args ){
-
-	if(args->port > 0){
-		OPTION_PORT = args->port;
-	}else{
-		util_err("port not set");
-		util_usage();	
-		return -1;
+int main(char argc, char *argv[]){
+	
+	if( args_handle(argc,argv) != -1 ){
+		run_server(OPTION_PORT);
 	}
 
-	OPTION_VERBOSE = args->verbose;
-	return 1;
-}
-
-int main(char argc, char *argv[]){	
-	int result = export_args(args_parse(argc, argv));
-
-	if(result != -1)
-	run_server(OPTION_PORT);
-
 	return 0;
-};
-
+}
