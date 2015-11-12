@@ -20,6 +20,10 @@ void say(char *msg){
 	}
 }
 
+void print_usage(){
+	printf("%s\n", "Usage: build/app -p <port> [-v]");
+}
+
 void print_startup(int port){
 	char *port_string = malloc(32);
 	bzero(port_string,32);
@@ -114,7 +118,8 @@ int export_args( struct ArgBuffer *args ){
 	if(args->port > 0){
 		OPTION_PORT = args->port;
 	}else{
-		err("port not set");	
+		err("port not set");
+		print_usage();	
 		return -1;
 	}
 
