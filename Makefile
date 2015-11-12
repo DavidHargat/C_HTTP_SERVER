@@ -2,11 +2,14 @@
 # List of all object files
 OBJECTS = build/main.o\
 	  build/file.o\
-	  build/args.o
+	  build/args.o\
+	  build/util.o
 
 HEADERS = src/socklib.h\
 	  src/file.h\
-	  src/args.h
+	  src/args.h\
+	  src/util.h\
+	  src/options.h
 
 
 .PHONY: all

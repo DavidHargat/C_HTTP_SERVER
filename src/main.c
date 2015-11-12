@@ -6,31 +6,13 @@
 #include "socklib.h"
 #include "file.h"
 #include "args.h"
+#include "util.h"
 
-static int OPTION_PORT = -1;
-static int OPTION_VERBOSE = -1;
+#include "options.h"
 
-void err(char *msg){
-	printf("[*] error '%s'.\n",msg);
-}
-
-void say(char *msg){
-	if(OPTION_VERBOSE == 1){
-		printf("[*] %s\n",msg);
-	}
-}
-
-void print_usage(){
-	printf("%s\n", "Usage: build/app -p <port> [-v]");
-}
-
-void print_startup(int port){
-	char *port_string = malloc(32);
-	bzero(port_string,32);
-	snprintf(port_string,32,"%d",port);
+int OPTION_PORT = -1;
+int OPTION_VERBOSE = -1;
 	
-	printf("[*] Running server on *%s.\n", port_string);
-}
 
 void handle_client_response(int sockfd){	
 	char *headers = "HTTP/1.1 200 OK\nContent-Type: text/html\n";
@@ -38,7 +20,7 @@ void handle_client_response(int sockfd){
 	struct FileBuffer *f = file_read("index.html");
 	
 	if( f->data == NULL){
-		err("(handle_client_response) reading file");
+		util_err("(handle_client_response) reading file");
 	}
 
 	char *length = malloc(32);
@@ -86,26 +68,26 @@ void run_server(int port){
 	signed char running = 1;
 	
 	if(server_sock < 0){
-		err("(sl_tcp_server) binding socket");
+		util_err("(sl_tcp_server) binding socket");
 		running = 0;
 	}
 
 	if(OPTION_VERBOSE==1)
-		print_startup(port);
+		util_startup(port);
 	
 	while(running){
 		client_sock = sl_accept(server_sock,client_addr);
 		
 		if(client_sock < 0){
-			err("(sl_accept) accepting connection.");
+			util_err("(sl_accept) accepting connection.");
 			running = 0;
 		}else{
-			say("Accepted Connection.");
+			util_say("Accepted Connection.");
 		}
 		
 		handle_client(client_sock);
 		close(client_sock);	
-		say("Closed Connection.");
+		util_say("Closed Connection.");
 	}
 	
 	// We check != NULL here incase our addr's failed to be allocated -
@@ -115,11 +97,12 @@ void run_server(int port){
 }
 
 int export_args( struct ArgBuffer *args ){
+
 	if(args->port > 0){
 		OPTION_PORT = args->port;
 	}else{
-		err("port not set");
-		print_usage();	
+		util_err("port not set");
+		util_usage();	
 		return -1;
 	}
 
