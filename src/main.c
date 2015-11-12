@@ -7,15 +7,25 @@
 #include "file.h"
 #include "args.h"
 
+static int OPTION_PORT = -1;
+static int OPTION_VERBOSE = -1;
+
 void err(char *msg){
 	printf("[*] error '%s'.\n",msg);
+}
+
+void say(char *msg){
+	if(OPTION_VERBOSE == 1){
+		printf("[*] %s\n",msg);
+	}
 }
 
 void print_startup(int port){
 	char *port_string = malloc(32);
 	bzero(port_string,32);
 	snprintf(port_string,32,"%d",port);
-	printf("[*] Running server on *%s.\n", port_string);	
+	
+	printf("[*] Running server on *%s.\n", port_string);
 }
 
 void handle_client_response(int sockfd){	
@@ -76,7 +86,8 @@ void run_server(int port){
 		running = 0;
 	}
 
-	print_startup(port);
+	if(OPTION_VERBOSE==1)
+		print_startup(port);
 	
 	while(running){
 		client_sock = sl_accept(server_sock,client_addr);
@@ -85,12 +96,12 @@ void run_server(int port){
 			err("(sl_accept) accepting connection.");
 			running = 0;
 		}else{
-			printf("%s", "[*] Accepted Connection.\n");
+			say("Accepted Connection.");
 		}
 		
 		handle_client(client_sock);
 		close(client_sock);	
-		printf("%s", "[*] Closed Connection.\n");
+		say("Closed Connection.");
 	}
 	
 	// We check != NULL here incase our addr's failed to be allocated -
@@ -98,15 +109,24 @@ void run_server(int port){
 	if(server_addr!=NULL) free(server_addr);
 	if(client_addr!=NULL) free(client_addr);
 }
-int main(char argc, char *argv[]){
-	int port = 1024;
-	
-	struct ArgBuffer *args = args_parse(argc, argv);
-	
-	printf("[*] option port '%d'\n", args->port);	
-	printf("[*] option verbose '%d'\n", args->verbose);
-	
-	//run_server(port);
+
+int export_args( struct ArgBuffer *args ){
+	if(args->port > 0){
+		OPTION_PORT = args->port;
+	}else{
+		err("port not set");	
+		return -1;
+	}
+
+	OPTION_VERBOSE = args->verbose;
+	return 1;
+}
+
+int main(char argc, char *argv[]){	
+	int result = export_args(args_parse(argc, argv));
+
+	if(result != -1)
+	run_server(OPTION_PORT);
 
 	return 0;
 };
